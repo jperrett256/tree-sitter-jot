@@ -1,0 +1,23 @@
+{
+  "grammars": [
+    {
+      "name": "jot",
+      "camelcase": "JOT",
+      "scope": "text.jot",
+      "file-types": [ "jot" ],
+      "highlights": "queries/highlights.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "JOT grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Joshua Perrett",
+        "email": "jperrett256@gmail.com"
+      }
+    ]
+  }
+}
+
