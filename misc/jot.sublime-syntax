@@ -1,0 +1,132 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/syntax.html
+name: JOT
+file_extensions:
+  - jot
+scope: text.jot
+
+contexts:
+  main:
+    - include: heading
+    - include: block-tag
+    - include: paragraph
+
+  heading:
+    - match: ^(#+)( )
+      captures:
+        1: markup.heading.marker.jot punctuation.definition.heading.jot
+        2: punctuation.separator.jot
+      push: heading-content
+
+  heading-content:
+    - meta_scope: markup.heading.jot
+    - match: $
+      pop: true
+    - include: inline-content
+
+  block-tag:
+    - match: ^(@>+)([a-zA-Z_][a-zA-Z0-9_-]*)
+      captures:
+        1: punctuation.definition.tag.begin.jot
+        2: entity.name.function.jot
+      push: block-tag-args
+
+  block-tag-args:
+    - match: '\['
+      scope: punctuation.section.brackets.begin.jot
+      push: block-tag-args-content
+    - match: $
+      set: block-tag-content
+    - match: '(?=.)'
+      set: block-tag-content
+
+  block-tag-args-content:
+    - meta_scope: meta.tag.arguments.jot variable.parameter.jot
+    - match: '\]'
+      scope: punctuation.section.brackets.end.jot
+      pop: true
+
+  block-tag-content:
+    - match: ^(@<+)
+      scope: punctuation.definition.tag.end.jot
+      pop: true
+    - include: main
+
+  paragraph:
+    - match: (?=\S)
+      push: paragraph-content
+
+  paragraph-content:
+    - match: ^$
+      pop: true
+    - match: ^(?=#+\s)
+      pop: true
+    - match: ^(?=@>+)
+      pop: true
+    - match: ^(?=@<+)
+      pop: true
+    - include: inline-content
+
+  inline-content:
+    - include: inline-tag
+    - include: raw-string
+    - include: escape-sequence
+    - include: text
+
+  inline-tag:
+    - match: (@)([a-zA-Z_][a-zA-Z0-9_-]*)
+      captures:
+        1: punctuation.definition.tag.jot
+        2: entity.name.function.jot
+      push: inline-tag-after-name
+
+  inline-tag-after-name:
+    - match: '\['
+      scope: punctuation.section.brackets.begin.jot
+      set: inline-tag-args
+    - match: '\{'
+      scope: punctuation.section.braces.begin.jot
+      set: inline-tag-content
+    - match: '(?=.)'
+      pop: true
+
+  inline-tag-args:
+    - meta_scope: meta.tag.arguments.jot variable.parameter.jot
+    - match: '\]'
+      scope: punctuation.section.brackets.end.jot
+      set: inline-tag-after-args
+    - match: '\n'
+      scope: invalid.illegal.newline.jot
+      pop: true
+
+  inline-tag-after-args:
+    - match: '\{'
+      scope: punctuation.section.braces.begin.jot
+      set: inline-tag-content
+    - match: '(?=.)'
+      pop: true
+
+  inline-tag-content:
+    - meta_scope: meta.tag.content.jot
+    - match: '\}'
+      scope: punctuation.section.braces.end.jot
+      pop: true
+    - include: inline-content
+
+  raw-string:
+    - match: (@)(`)((?:[^`\n])+)(`)
+      scope: meta.string.raw.jot
+      captures:
+        1: punctuation.definition.tag.jot
+        2: punctuation.definition.string.begin.jot
+        3: string.quoted.other.jot
+        4: punctuation.definition.string.end.jot
+
+  escape-sequence:
+    - match: \\[@{}\\]
+      scope: constant.character.escape.jot
+
+  text:
+    - match: '[^@#{}\\\n]+'
+      scope: text.jot
